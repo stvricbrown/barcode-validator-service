@@ -46,6 +46,6 @@ You can also use curl in the Git for Bash application for ad-hoc requests.
     ```
     .\gradlew.bat -Dorg.gradle.java.home=c:\Tools\jdk-17 --console plain --no-build-cache --no-configuration-cache --no-daemon --refresh-dependencies --rerun-tasks --warning-mode all clean build
     ```
-2. had a problem making Spring "see" my controller class. In then end, I had to directly import that class.
+2. I had a problem making Spring "see" my controller class. In then end, I had to directly import that class, which should not be necessary.
 
 3. The Web service uses HTTP, not HTTPS. I figured that's OK for a demonstration, but it's no good for production use.
