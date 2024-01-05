@@ -105,24 +105,22 @@ public class S10BarcodeValidator implements BarcodeValidator<String> {
         String message = format("The check digit \"%s\" in the S10 barcode \"%s\" should be \"%s\".",
                                 expectedCheckDigit, s10Barcode, calculatedCheckDigit);
         messages.add(message);
-        return  false;
+        return false;
     }
 
     private int calculateCheckDigit(String serialNumber) {
 
         int sumOfProducts = 0;
         for (int index = 0; index < SERIAL_NUMBER_LENGTH; index++) {
-            int digit = serialNumber.charAt(index) - '0';
-            int product = digit * CHECK_DIGIT_WEIGHTS[index];
-            sumOfProducts += product;
+            sumOfProducts += (serialNumber.charAt(index) - '0') * CHECK_DIGIT_WEIGHTS[index];
         }
 
         int checkDigit = 11 - sumOfProducts % 11;
-        if (checkDigit == 10) {
-            checkDigit = 0;
-        } else if (checkDigit == 11) {
-            checkDigit = 5;
-        }
-        return checkDigit;
+
+        return switch(checkDigit) {
+            case 10 -> 0;
+            case 11 -> 5;
+            default -> checkDigit;
+        };
     }
 }
