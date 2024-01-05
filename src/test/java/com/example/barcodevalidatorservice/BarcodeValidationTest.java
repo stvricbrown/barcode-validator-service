@@ -7,10 +7,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsIn.in;
+import static org.hamcrest.core.Every.everyItem;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,40 +43,32 @@ class BarcodeValidationTest extends ValidatorTestBase {
 
     @ParameterizedTest
     @MethodSource("provideValidS10Barcodes")
-    void testValidBarcode() {
+    void testValidBarcode(String expectedS10Barcode, List<String> expectedMessages) {
 
         // Given
-        String expectedS10Barcode =  "AB473124829GB";
         ValidationRequest validationRequest = new ValidationRequest(expectedS10Barcode);
-        boolean isBarcodeValid = true;
-        String expectedMessage = format("The S10 barcode \"%s\" is a valid S10 barcode.", expectedS10Barcode);
 
-        List<String> expectedMessages = new ArrayList<>();
-        expectedMessages.add(expectedMessage);
-
-        doTestAndVerifyResponse(expectedS10Barcode, validationRequest, isBarcodeValid, expectedMessages);
+        // When, Then
+        doTestAndVerifyResponse(expectedS10Barcode, validationRequest, true, expectedMessages);
 
     }
 
     @ParameterizedTest
     @MethodSource("provideInvalidS10Barcodes")
-    void testInvalidBarcode() {
+    void testInvalidBarcode(String expectedS10Barcode, List<String> expectedMessages) {
 
         // Given
-        String expectedS10Barcode =  "AB473124829GB";
         ValidationRequest validationRequest = new ValidationRequest(expectedS10Barcode);
-        boolean isBarcodeValid = true;
-        String expectedMessage = format("The S10 barcode \"%s\" is a valid S10 barcode.", expectedS10Barcode);
 
-        List<String> expectedMessages = new ArrayList<>();
-        expectedMessages.add(expectedMessage);
-
-        doTestAndVerifyResponse(expectedS10Barcode, validationRequest, isBarcodeValid, expectedMessages);
+        // When, Then
+        doTestAndVerifyResponse(expectedS10Barcode, validationRequest, false, expectedMessages);
 
     }
 
-    private void doTestAndVerifyResponse(String expectedS10Barcode, ValidationRequest validationRequest, boolean isBarcodeValid,
-                    List<String> expectedMessages) {
+    private void doTestAndVerifyResponse(String expectedS10Barcode,
+                                         ValidationRequest validationRequest,
+                                         boolean isBarcodeValid,
+                                         List<String> expectedMessages) {
 
         // When
         webTestClient.post().uri("/validate")
@@ -88,11 +81,10 @@ class BarcodeValidationTest extends ValidatorTestBase {
                      .expectStatus().isOk()
                      .expectHeader().contentType(APPLICATION_JSON)
                      .expectBody()
-                     .consumeWith(responseExchangeResult ->
-                         this.verifyResponseBody(responseExchangeResult,
-                                                 isBarcodeValid,
-                                                 expectedS10Barcode,
-                                                 expectedMessages));
+                     .consumeWith(responseExchangeResult -> verifyResponseBody(responseExchangeResult,
+                                                                               isBarcodeValid,
+                                                                               expectedS10Barcode,
+                                                                               expectedMessages));
     }
 
     private void verifyResponseBody(EntityExchangeResult<byte[]> responseExchangeResult,
@@ -113,13 +105,12 @@ class BarcodeValidationTest extends ValidatorTestBase {
 
         ValidationResponse validationResponse = convertJsonToPojo(json);
 
-        String message = format("The barcode \"%s\" is valid.", expectedS10Barcode);
-        assertThat(message, validationResponse.status(), is(equalTo(isBarcodeValid)));
-        message = format("The barcode must be \"%s\".", expectedS10Barcode);
-        assertThat(message, validationResponse.s10Barcode(), is(equalTo(expectedS10Barcode)));
-        message = "The messages must be expected messages.";
-        assertThat(message, validationResponse.messages(), is(equalTo(expectedMessages)));
-
+        String reason = format("The barcode \"%s\" is valid.", expectedS10Barcode);
+        assertThat(reason, validationResponse.status(), is(equalTo(isBarcodeValid)));
+        reason = format("The barcode must be \"%s\".", expectedS10Barcode);
+        assertThat(reason, validationResponse.s10Barcode(), is(equalTo(expectedS10Barcode)));
+        assertThat("All the expected number of messages should be present.",
+                   validationResponse.messages(), everyItem(is(in(expectedMessages))));
     }
 
     private ValidationResponse convertJsonToPojo(String jsonString) {
