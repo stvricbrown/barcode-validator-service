@@ -114,11 +114,11 @@ class BarcodeValidationTest extends ValidatorTestBase {
         ValidationResponse validationResponse = convertJsonToPojo(json);
 
         String message = format("The barcode \"%s\" is valid.", expectedS10Barcode);
-        assertThat(message, validationResponse.getStatus(), is(equalTo(isBarcodeValid)));
+        assertThat(message, validationResponse.status(), is(equalTo(isBarcodeValid)));
         message = format("The barcode must be \"%s\".", expectedS10Barcode);
-        assertThat(message, validationResponse.getS10Barcode(), is(equalTo(expectedS10Barcode)));
+        assertThat(message, validationResponse.s10Barcode(), is(equalTo(expectedS10Barcode)));
         message = "The messages must be expected messages.";
-        assertThat(message, validationResponse.getMessages(), is(equalTo(expectedMessages)));
+        assertThat(message, validationResponse.messages(), is(equalTo(expectedMessages)));
 
     }
 

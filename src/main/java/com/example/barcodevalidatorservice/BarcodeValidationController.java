@@ -21,7 +21,7 @@ public class BarcodeValidationController implements IBarcodeValidationController
     public ResponseEntity<ValidationResponse> validate(ValidationRequest validationRequest) {
         BarcodeValidator<String> barcodeValidator = new S10BarcodeValidator();
 
-        String s10Barcode = validationRequest.getS10Barcode();
+        String s10Barcode = validationRequest.s10Barcode();
         List<String> messages = new ArrayList<>();
         boolean isBarcodeValid = barcodeValidator.validate(s10Barcode, messages);
         ValidationResponse responseBody = new ValidationResponse(s10Barcode, unmodifiableList(messages), isBarcodeValid);
